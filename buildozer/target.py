@@ -8,6 +8,8 @@ def no_config(f):
 
 
 class Target(object):
+    """Base class for buildozer installation targets
+    """
     def __init__(self, buildozer):
         super(Target, self).__init__()
         self.buildozer = buildozer

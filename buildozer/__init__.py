@@ -244,6 +244,8 @@ class Buildozer(object):
     #
 
     def checkbin(self, msg, fn):
+        """Check for a binary dependency
+        """
         self.debug('Search for {0}'.format(msg))
         if exists(fn):
             return realpath(fn)
@@ -256,6 +258,28 @@ class Buildozer(object):
         exit(1)
 
     def cmd(self, command, **kwargs):
+        """Run a command, using a combo of system and our environment
+
+        Parameters
+        ----------
+        break_on_error: boolean (defaut: True)
+        close_fds: (default: True)
+        env: Dictionary of environment variables (default: copy of system environment)
+        get_stderr: boolean (default: False)
+        get_stdout: boolean (default: False)
+        sensible: (defaut: False)
+        shell: (default: True)
+        show_output: boolean (default: True if log_level > 1, False otherwise)
+        stderr:
+        stdout:
+
+        Returns
+        -------
+        tuple: (stdout, stderr, return_code)
+
+        `stdout`, `stderr` will be None unless `get_stdout` or `get_stderr` was set
+
+        """
         # prepare the environ, based on the system + our own env
         env = copy(environ)
         env.update(self.environ)
@@ -1007,6 +1031,17 @@ class Buildozer(object):
         print('')
 
     def run_default(self):
+        """Run Buildozer with defaults.
+
+        This specifies the actions to be taken if buildozer is run without
+        arguments.
+
+        The default behavior is stored in the state database, and
+        can be changed by doing a:
+           ```
+           buildozer setdefault <command args...>
+           ```
+        """
         self.check_build_layout()
         if 'buildozer:defaultcommand' not in self.state:
             print('No default command set.')
@@ -1145,6 +1180,25 @@ class Buildozer(object):
     #
 
     def _merge_config_profile(self):
+        """Merge all the relevant profiles together
+
+        In addition to the global buildozer.spec section
+        (typically called [app]), you can define additional profiles which
+        extend or override  the generic sections and keys
+
+        Sections are named as follows:
+        [section_base@section_profile_list]
+        e.g. To define key/value pairs that apply to a a pair of profiles
+        (defauld, hd), we would use the section:
+            ```
+            [app@default,hd]
+            ```
+
+        if `self.config_profile` is in this list, the key/value pairs
+        will be merged into the global profile
+        (or added, if the section doesn't yet exist)
+
+        """
         profile = self.config_profile
         if not profile:
             return

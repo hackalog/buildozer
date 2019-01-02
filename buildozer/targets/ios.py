@@ -62,6 +62,25 @@ class TargetIos(Target):
     targetname = "ios"
 
     def check_requirements(self):
+        """Ensures requirements are met.
+
+        * Check for binary dependencies
+            * xcodebuild
+            * xcode-select
+            * git
+            * cython
+            * pkg-config
+            * autoconf
+            * automake
+            * libtool
+        * Check installed iOS SDK versions
+        * Check XCode path
+
+        Returns
+        -------
+        None. Raises Exception if dependency check fails
+
+        """
         checkbin = self.buildozer.checkbin
         cmd = self.buildozer.cmd
 
@@ -91,6 +110,11 @@ class TargetIos(Target):
         self.buildozer.debug(' -> found {0}'.format(xcode))
 
     def install_platform(self):
+        """Create and populate platform directory
+
+        The platform directory (usually `.buildozer/ios/platform`)
+        holds the build tools needed to install for the target platform
+        """
         self.ios_dir = self.install_or_update_repo('kivy-ios', platform='ios')
         self.ios_deploy_dir = self.install_or_update_repo('ios-deploy',
                                                           platform='ios',
@@ -310,6 +334,10 @@ class TargetIos(Target):
         pass
 
     def check_configuration_tokens(self):
+        """Check for valid config tokens
+
+        This includes checking for a valid Apple Developer certificate.
+        """
         errors = []
         config = self.buildozer.config
         identity_debug = config.getdefault('app', 'ios.codesign.debug', '')
