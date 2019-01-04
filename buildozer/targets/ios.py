@@ -192,13 +192,6 @@ class TargetIos(Target):
         # ok, write the modified plist.
         plistlib.writePlist(plist, plist_rfn)
 
-        mode = 'Debug' if self.build_mode == 'debug' else 'Release'
-        self.buildozer.cmd('xcodebuild -configuration {} ENABLE_BITCODE=NO clean build'.format(mode),
-                cwd=self.app_project_dir)
-        ios_app_dir = '{app_lower}-ios/build/{mode}-iphoneos/{app_lower}.app'.format(
-                app_lower=app_name.lower(), mode=mode)
-        self.buildozer.state['ios:latestappdir'] = ios_app_dir
-
         key = 'ios.codesign.{}'.format(self.build_mode)
         ioscodesign = self.buildozer.config.getdefault('app', key, '')
         if not ioscodesign:
@@ -207,6 +200,16 @@ class TargetIos(Target):
             return
         elif ioscodesign[0] not in ('"', "'"):
             ioscodesign = '"{}"'.format(ioscodesign)
+
+        mode = 'Debug' if self.build_mode == 'debug' else 'Release'
+        self.buildozer.cmd(('xcodebuild -configuration {}'
+                            ' CODE_SIGN_IDENTITY={}'
+                            ' ENABLE_BITCODE=NO clean build'
+            ).format(mode=mode, identity=ioscodesign),
+            cwd=self.app_project_dir)
+        ios_app_dir = '{app_lower}-ios/build/{mode}-iphoneos/{app_lower}.app'.format(
+                app_lower=app_name.lower(), mode=mode)
+        self.buildozer.state['ios:latestappdir'] = ios_app_dir
 
         intermediate_dir = join(self.ios_dir, '{}-{}.intermediates'.format(app_name, version))
         xcarchive = join(intermediate_dir, '{}-{}.xcarchive'.format(
